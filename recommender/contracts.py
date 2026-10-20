@@ -13,6 +13,7 @@ class Algorithm(StrEnum):
     itemcf = "itemcf"
     als = "als"
     cold_start = "cold_start"
+    rrf_fusion = "rrf_fusion"
 
 
 @dataclass(frozen=True)

@@ -11,9 +11,11 @@ from .content import ContentProvider
 from .itemcf import ItemCFProvider
 from .als import ALSProvider
 from .cold_start import ColdStartProvider
+from .rrf import RRFProvider
 
 PROVIDERS[Algorithm.popular] = PopularProvider(MODELS / "popular-v1" / "manifest.json")
 PROVIDERS[Algorithm.content] = ContentProvider(MODELS / "content-v1" / "manifest.json")
 PROVIDERS[Algorithm.itemcf] = ItemCFProvider(MODELS / "itemcf-v1" / "manifest.json")
 PROVIDERS[Algorithm.als] = ALSProvider(MODELS / "als-v1" / "manifest.json")
 PROVIDERS[Algorithm.cold_start] = ColdStartProvider(MODELS / "cold-start-v1" / "manifest.json")
+PROVIDERS[Algorithm.rrf_fusion] = RRFProvider(MODELS / "rrf-v1" / "manifest.json")
