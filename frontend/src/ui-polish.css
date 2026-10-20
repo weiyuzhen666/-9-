@@ -1,0 +1,203 @@
+/* =====================================================================
+   CineLab UI polish — iQiyi-style bright theme
+   ===================================================================== */
+
+/* ----- Hero: iQiyi green gradient with soft glow ----- */
+.hero {
+  background:
+    radial-gradient(ellipse at 85% 20%, rgba(255, 255, 255, 0.18), transparent 50%),
+    radial-gradient(ellipse at 10% 80%, rgba(0, 168, 5, 0.4), transparent 50%),
+    linear-gradient(135deg, #00BE06 0%, #00a805 60%, #00d407 100%);
+  color: #fff;
+}
+.hero h1, .hero h2, .hero h3, .hero p, .hero .muted, .hero small {
+  color: #fff !important;
+}
+.hero .muted { opacity: 0.82; }
+
+/* ----- Orbital rings — white on green ----- */
+.orbital {
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 60px rgba(255, 255, 255, 0.08);
+}
+.orbital-two {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ----- Film ticket — bright white on green hero ----- */
+.film-ticket {
+  transform: rotate(9deg) translateZ(0);
+  box-shadow:
+    0 25px 50px -15px rgba(0, 0, 0, 0.25),
+    20px 24px 0 rgba(0, 0, 0, 0.12);
+  transition: transform 0.4s cubic-bezier(.2,.9,.3,1.2);
+}
+.hero:hover .film-ticket {
+  transform: rotate(5deg) translateY(-4px) translateZ(0);
+}
+
+/* ----- Primary button — pill-shaped iQiyi green ----- */
+.button.primary {
+  background: #00BE06;
+  border-radius: 22px;
+  box-shadow: 0 4px 14px -4px rgba(0, 190, 6, 0.5);
+  transition: all 0.22s ease;
+  color: #fff;
+}
+.button.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px -6px rgba(0, 190, 6, 0.6);
+  background: #00a805;
+}
+.button.subtle {
+  transition: all 0.22s ease;
+  border-radius: 18px;
+}
+.button.subtle:hover {
+  transform: translateY(-1px);
+  background: rgba(0, 190, 6, 0.08);
+  color: #00BE06;
+}
+
+/* ----- Movie card — bright white card with soft hover ----- */
+.movie-card {
+  transition: transform 0.28s cubic-bezier(.2,.8,.3,1.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.movie-card > a {
+  display: block;
+  transition: transform 0.28s cubic-bezier(.2,.8,.3,1.2);
+}
+.movie-card:hover > a {
+  transform: translateY(-4px);
+}
+.movie-card:hover .movie-poster {
+  box-shadow:
+    0 16px 36px -12px rgba(0, 0, 0, 0.18),
+    0 2px 6px rgba(0, 0, 0, 0.06);
+}
+.movie-card:hover h3 {
+  color: #00BE06;
+}
+
+/* ----- Poster placeholder — light gray ----- */
+.poster-placeholder {
+  background: linear-gradient(145deg, #f5f6f8, #e8e9ec);
+}
+
+/* ----- Section panels — soft white card shadow ----- */
+.algorithm-panel,
+.history-panel,
+.evaluation-panel,
+.filter-bar,
+.lab-controls,
+.rating-panel,
+.auth-card {
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 8px 24px -12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f1f3;
+}
+
+/* ----- Navigation active indicator ----- */
+.header-inner nav a.active,
+.header-inner nav a:hover {
+  color: #00BE06;
+  font-weight: 600;
+  border-bottom-width: 2px;
+}
+
+/* ----- Brand logo — iQiyi green ----- */
+.brand-mark {
+  color: #00BE06;
+}
+
+/* ----- Avatar — green gradient ----- */
+.avatar {
+  background: linear-gradient(135deg, #00BE06, #00d407);
+  border-color: rgba(0, 190, 6, 0.3);
+  color: #fff;
+}
+
+/* ----- Lab notice — green tint ----- */
+.lab-notice {
+  background: rgba(0, 190, 6, 0.05);
+  border-color: rgba(0, 190, 6, 0.18);
+  border-radius: 10px;
+}
+
+/* ----- Detail genre tags interactive ----- */
+.genre-tags .el-tag {
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border-radius: 14px;
+}
+.genre-tags .el-tag:hover {
+  color: #00BE06;
+  border-color: #00BE06;
+  background: rgba(0, 190, 6, 0.08);
+}
+
+/* ----- Status pill — green ----- */
+.status-pill {
+  background: rgba(0, 190, 6, 0.08);
+  border-color: rgba(0, 190, 6, 0.22);
+  color: #009805;
+  border-radius: 12px;
+}
+
+/* ----- Global scrollbar — light thin ----- */
+html, body {
+  scrollbar-width: thin;
+  scrollbar-color: #d0d3d8 #f5f6f8;
+}
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #f5f6f8; }
+::-webkit-scrollbar-thumb {
+  background: #d0d3d8;
+  border-radius: 6px;
+  border: 2px solid #f5f6f8;
+}
+::-webkit-scrollbar-thumb:hover { background: #b8bcc4; }
+
+/* ----- Filter bar green focus ----- */
+.filter-bar .el-input.is-focus .el-input__wrapper,
+.filter-bar .el-select.is-focused .el-select__wrapper {
+  box-shadow: 0 0 0 1px #00BE06 inset !important;
+}
+
+/* ----- Empty state icon gentle pulse ----- */
+.state-panel .el-icon,
+.algorithm-symbol {
+  transition: transform 0.3s ease;
+}
+.state-panel:hover .el-icon {
+  transform: scale(1.06);
+}
+
+/* ----- Back link hover slide + green ----- */
+.back-link { transition: all 0.18s ease; }
+.back-link:hover {
+  color: #00BE06;
+  transform: translateX(-3px);
+}
+
+/* ----- Site header — white background with shadow ----- */
+.site-header,
+.header-inner {
+  background: #fff;
+  border-bottom: 1px solid #f0f1f3;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+/* ----- Site footer — light gray ----- */
+.site-footer {
+  background: #fafbfc;
+  border-top: 1px solid #eee;
+  color: #8890a0;
+}
+.footer-brand {
+  color: #00BE06 !important;
+  font-weight: 700;
+}
