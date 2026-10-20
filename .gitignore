@@ -45,7 +45,8 @@ ibdata*
 **/.npm/
 /models/business/*
 !/models/business/README.md
-/models/evaluation/
+/models/evaluation/*
+!/models/evaluation/metrics.json
 # Teacher material never belongs in a student repository.
 /teacher/
 /teacher_reference/

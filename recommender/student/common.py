@@ -80,6 +80,18 @@ def load_eval_ratings() -> tuple[dict[str, dict[str, float]], dict[str, dict[str
     return user_items, item_users
 
 
+_EVAL_TRAIN_CACHE: dict[str, dict[str, float]] | None = None
+
+
+def eval_user_ratings(uid: str) -> dict[str, float]:
+    """User's ratings from evaluation/train.csv (cached). Used by providers in evaluation mode."""
+    global _EVAL_TRAIN_CACHE
+    if _EVAL_TRAIN_CACHE is None:
+        user_items, _ = load_eval_ratings()
+        _EVAL_TRAIN_CACHE = user_items
+    return _EVAL_TRAIN_CACHE.get(uid, {})
+
+
 def cosine(vec_a: dict[str, float], vec_b: dict[str, float]) -> float:
     """Cosine similarity of two sparse vectors."""
     common = set(vec_a) & set(vec_b)

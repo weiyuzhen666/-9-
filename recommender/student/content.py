@@ -101,7 +101,8 @@ class ContentProvider:
             history = read_history(request)
             user_items = {fb.movie_id: float(fb.rating) for fb in history.ratings}
         else:
-            user_items = {}
+            from .common import eval_user_ratings
+            user_items = eval_user_ratings(str(request.subject_id))
 
         scored: dict[str, float] = {}
         if not user_items:

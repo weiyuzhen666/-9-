@@ -63,8 +63,9 @@ class ColdStartProvider:
             user_items = {fb.movie_id: float(fb.rating) for fb in history.ratings}
             favorite_items = set(history.favorite_movie_ids)
         else:
-            user_items = {}
-            favorite_items = set()
+            from .common import eval_user_ratings
+            user_items = eval_user_ratings(str(request.subject_id))
+            favorite_items = {mid for mid, r in user_items.items() if r >= 4.0}
 
         seen = set(user_items.keys()) | favorite_items
 
