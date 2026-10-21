@@ -1,4 +1,4 @@
-export interface Account { account_id: string; subject_key: string; login_name: string }
+export interface Account { account_id: string; subject_key: string; login_name: string; favorite_genres?: string[] | null }
 export interface Movie {
   movie_id: string; movielens_title: string; title_zh: string | null; genres: string[]
   release_year?: number | null; poster_path: string | null; original_title?: string | null

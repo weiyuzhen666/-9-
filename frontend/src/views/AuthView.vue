@@ -8,7 +8,15 @@ import { safeRedirect } from '../router'
 import http, { ApiError, ensureCsrf, errorMessage } from '../api'
 const auth = useAuth(), route = useRoute(), router = useRouter()
 const register = computed(() => route.path === '/register')
-const form = reactive({ login_name: '', password: '' }), formRef = ref<FormInstance>()
+// 前端显示中文名，提交时映射回英文（数据库/算法仍用英文 genre）
+const GENRE_ZH_TO_EN = {
+  '动作':'Action','冒险':'Adventure','动画':'Animation','儿童':'Children','喜剧':'Comedy',
+  '犯罪':'Crime','纪录':'Documentary','剧情':'Drama','奇幻':'Fantasy','黑色电影':'Film-Noir',
+  '恐怖':'Horror','歌舞':'Musical','悬疑':'Mystery','爱情':'Romance','科幻':'Sci-Fi',
+  '惊悚':'Thriller','战争':'War','西部':'Western',
+} as const
+const ALL_GENRES_ZH = Object.keys(GENRE_ZH_TO_EN) as string[]
+const form = reactive({ login_name: '', password: '', favorite_genres: [] as string[] }), formRef = ref<FormInstance>()
 const busy = ref(false), error = ref<unknown>(null), recovery = ref('')
 const rules: FormRules = {
   login_name: [{ required: true, message: '请输入登录名', trigger: 'blur' }, { min: 3, max: 64, message: '登录名需3—64个字符', trigger: 'blur' }, { pattern: /^[\p{L}\p{N}_.-]+$/u, message: '使用字母、数字、下划线、点或短横线', trigger: 'blur' }],
@@ -19,8 +27,11 @@ async function submit() {
   busy.value = true; error.value = null; recovery.value = ''
   try {
     if (register.value) {
-      await http.post('/auth/register', form)
-      form.password = ''; ElMessage.success('注册成功，请登录')
+      // 中文名 → 英文再提交
+      const genresEn = form.favorite_genres.map(zh => GENRE_ZH_TO_EN[zh as keyof typeof GENRE_ZH_TO_EN]).filter(Boolean)
+      const payload = { login_name: form.login_name, password: form.password, favorite_genres: genresEn.length ? genresEn : undefined }
+      await http.post('/auth/register', payload)
+      form.password = ''; form.favorite_genres = []; ElMessage.success('注册成功，请登录')
       await router.replace({ path: '/login', query: route.query })
     } else { await auth.signIn(form.login_name, form.password); form.password = ''; await router.push(safeRedirect(route.query.redirect)) }
   } catch (e) { error.value = e }
@@ -32,7 +43,28 @@ async function recover() { try { await ensureCsrf(true); error.value = null; rec
   <div class="page auth-page"><section class="auth-intro"><p class="eyebrow">A SPACE FOR YOUR TASTE</p><h1>记录喜欢，<br /><span>让发现发生。</span></h1><p>为看过的电影评分，把想看的电影收藏。<br />你的片单，从这里开始。</p><div class="auth-decoration" aria-hidden="true"><span>01 / WATCH</span><span>02 / RATE</span><span>03 / DISCOVER</span></div><p class="muted">推荐功能尚未实现，等待算法接入。</p></section>
     <section class="auth-card"><div class="auth-tabs"><RouterLink :to="{path:'/login',query:route.query}" :class="{selected:!register}">登录</RouterLink><RouterLink :to="{path:'/register',query:route.query}" :class="{selected:register}">创建账号</RouterLink></div><h2>{{ register ? '开启你的电影档案' : '欢迎回到文华影视' }}</h2><p class="muted">{{ register ? '注册业务账号，历史 MovieLens 用户无需注册。' : '使用你自己的注册账号登录。' }}</p>
       <el-alert v-if="route.query.reason === 'expired'" title="会话已失效，请重新登录" type="warning" :closable="false" />
-      <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent="submit"><el-form-item label="登录名" prop="login_name"><el-input v-model="form.login_name" name="username" autocomplete="username" :maxlength="64" placeholder="3—64个字符" /></el-form-item><el-form-item label="密码" prop="password"><el-input v-model="form.password" type="password" name="password" :autocomplete="register ? 'new-password' : 'current-password'" show-password :maxlength="128" placeholder="12—128个字符" /></el-form-item><div v-if="error" class="form-error" role="alert"><p>{{ errorMessage(error) }}</p><el-button v-if="error instanceof ApiError && error.code === 'CSRF_REJECTED'" text @click="recover">更新安全凭据</el-button></div><p v-if="recovery" role="status">{{ recovery }}</p><el-button type="primary" native-type="submit" class="full-width" :loading="busy">{{ register ? '创建账号' : '登录' }}</el-button></el-form><p class="form-hint">历史匿名用户使用 ml: 标识，注册账号使用 app: 标识，两者独立。</p>
+      <el-form ref="formRef" :model="form" :rules="rules" label-position="top" @submit.prevent="submit"><el-form-item label="登录名" prop="login_name"><el-input v-model="form.login_name" name="username" autocomplete="username" :maxlength="64" placeholder="3—64个字符" /></el-form-item><el-form-item label="密码" prop="password"><el-input v-model="form.password" type="password" name="password" :autocomplete="register ? 'new-password' : 'current-password'" show-password :maxlength="128" placeholder="12—128个字符" /></el-form-item><el-form-item v-if="register" label="你喜欢的电影类型（选填）" prop="favorite_genres"><div class="genre-chips"><el-checkbox-group v-model="form.favorite_genres"><el-checkbox v-for="g in ALL_GENRES_ZH" :key="g" :value="g" class="genre-chip" :border="false" :label="g">{{ g }}</el-checkbox></el-checkbox-group></div><p class="form-hint">选择后，系统将基于你的偏好给出个性化冷启动推荐。后续评分越多，推荐越精准。</p></el-form-item><div v-if="error" class="form-error" role="alert"><p>{{ errorMessage(error) }}</p><el-button v-if="error instanceof ApiError && error.code === 'CSRF_REJECTED'" text @click="recover">更新安全凭据</el-button></div><p v-if="recovery" role="status">{{ recovery }}</p><el-button type="primary" native-type="submit" class="full-width" :loading="busy">{{ register ? '创建账号' : '登录' }}</el-button></el-form><p class="form-hint">历史匿名用户使用 ml: 标识，注册账号使用 app: 标识，两者独立。</p>
     </section>
   </div>
 </template>
+<style scoped>
+.genre-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.genre-chip {
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  background: #f2f3f5;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.genre-chip:hover { background: #e5e7eb; }
+/* 只让复选框变绿，文字/背景保持原样 */
+.genre-chip .el-checkbox__inner { background: #fff; border-color: #ccc; }
+.genre-chip .el-checkbox__input.is-checked .el-checkbox__inner {
+  background-color: #00BE06;
+  border-color: #00BE06;
+}
+.genre-chip .el-checkbox__input.is-checked + .el-checkbox__label { color: #555; }
+</style>

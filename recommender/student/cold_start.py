@@ -58,14 +58,29 @@ class ColdStartProvider:
 
     def recommend(self, request: RecommendationRequest) -> RecommendationResult:
         if request.runtime_mode == "business":
-            from recommender.business import read_history
+            from recommender.business import read_history, _database
+            from sqlalchemy import text
+
             history = read_history(request)
             user_items = {fb.movie_id: float(fb.rating) for fb in history.ratings}
             favorite_items = set(history.favorite_movie_ids)
+            # For brand-new users with zero ratings, try to read their favorite genres from accounts table
+            user_favorite_genres: set[str] | None = None
+            if not user_items and request.subject_kind == "app":
+                try:
+                    with _database().connection() as conn:
+                        row = conn.execute(text(
+                            "SELECT favorite_genres FROM accounts WHERE account_id=:id"
+                        ), {"id": uid}).first()
+                    if row and row[0]:
+                        user_favorite_genres = {g for g in row[0].split("|") if g}
+                except Exception:
+                    user_favorite_genres = None
         else:
             from .common import eval_user_ratings
             user_items = eval_user_ratings(str(request.subject_id))
             favorite_items = {mid for mid, r in user_items.items() if r >= 4.0}
+            user_favorite_genres = None
 
         seen = set(user_items.keys()) | favorite_items
 
@@ -77,6 +92,11 @@ class ColdStartProvider:
             # As user gives more ratings, rely less on popular, more on content
             beta = min(0.7, 0.1 * history_len)
             alpha = 1.0 - beta
+        elif user_favorite_genres:
+            # Zero-rating user but has genre preferences from registration:
+            # blend popular with a mild content boost based on favorite genres
+            beta = 0.5
+            alpha = 0.5
 
         scored: dict[str, float] = defaultdict(float)
 
@@ -86,26 +106,30 @@ class ColdStartProvider:
                 continue
             scored[mid] += score * alpha
 
-        # Content component: if user has rated anything positive, boost similar-genre movies
+        # Content component: if user has positive ratings OR registered genre preferences
+        genre_weight: dict[str, float] = defaultdict(float)
         if history_len > 0:
             # Aggregate user genre profile from positive ratings (>= 4.0)
-            genre_weight: dict[str, float] = defaultdict(float)
             for mid, rating in user_items.items():
                 if rating >= 4.0:
                     for g in self.movie_genres.get(mid, set()):
                         genre_weight[g] += (rating - 3.0)
-            if genre_weight:
-                # Score all catalog movies by genre overlap
-                with open(PACKAGE / "training-catalog.csv", encoding="utf-8", newline="") as f:
-                    for row in csv.DictReader(f):
-                        mid = row["movie_id"]
-                        if mid in seen:
-                            continue
-                        genres = self.movie_genres.get(mid, set())
-                        if not genres:
-                            continue
-                        content_score = sum(genre_weight.get(g, 0.0) for g in genres) / math.sqrt(len(genres))
-                        scored[mid] += content_score * beta
+        elif user_favorite_genres:
+            # Zero-ratings but registered preferences: equal weight to each chosen genre
+            for g in user_favorite_genres:
+                genre_weight[g] = 1.0
+        if genre_weight:
+            # Score all catalog movies by genre overlap
+            with open(PACKAGE / "training-catalog.csv", encoding="utf-8", newline="") as f:
+                for row in csv.DictReader(f):
+                    mid = row["movie_id"]
+                    if mid in seen:
+                        continue
+                    genres = self.movie_genres.get(mid, set())
+                    if not genres:
+                        continue
+                    content_score = sum(genre_weight.get(g, 0.0) for g in genres) / math.sqrt(len(genres))
+                    scored[mid] += content_score * beta
 
         ranked = sorted(scored.items(), key=lambda x: (-x[1], int(x[0])))[: request.limit]
 

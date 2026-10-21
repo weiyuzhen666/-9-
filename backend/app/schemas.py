@@ -12,6 +12,7 @@ class Input(BaseModel):
 class Credentials(Input):
     login_name: StrictStr = Field(min_length=3, max_length=64, pattern=r"^[\w.-]+$")
     password: StrictStr = Field(min_length=12, max_length=128)
+    favorite_genres: list[str] | None = Field(default=None, max_length=20)
 
 
 class Page(Input):

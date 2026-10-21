@@ -20,10 +20,19 @@ def csrf(request: Request, response: Response):
 @router.post("/register", status_code=201)
 def register(body: Credentials, request: Request):
     hashed = PASSWORDS.hash(body.password)
+    genres_str = "|".join(body.favorite_genres) if body.favorite_genres else None
     try:
         with request.app.state.db.connection(write=True) as conn:
-            result = conn.execute(text("INSERT INTO accounts(login_name,password_hash) VALUES(:name,:hash)"),
-                {"name": body.login_name, "hash": hashed})
+            if genres_str is not None:
+                result = conn.execute(
+                    text("INSERT INTO accounts(login_name,password_hash,favorite_genres) VALUES(:name,:hash,:genres)"),
+                    {"name": body.login_name, "hash": hashed, "genres": genres_str},
+                )
+            else:
+                result = conn.execute(
+                    text("INSERT INTO accounts(login_name,password_hash) VALUES(:name,:hash)"),
+                    {"name": body.login_name, "hash": hashed},
+                )
             return {"account_id": str(result.lastrowid), "subject_key": "app:" + str(result.lastrowid), "login_name": body.login_name}
     except IntegrityError as exc:
         if exc.orig.args[0] == 1062:
@@ -50,8 +59,15 @@ def login(body: Credentials, request: Request, response: Response):
 
 
 @router.get("/me")
-def me(actor: ActorDependency):
-    return public_account(actor)
+def me(actor: ActorDependency, request: Request):
+    base = public_account(actor)
+    try:
+        with request.app.state.db.connection() as conn:
+            row = conn.execute(text("SELECT favorite_genres FROM accounts WHERE account_id=:id"), {"id": actor.account_id}).first()
+            base["favorite_genres"] = row[0].split("|") if row and row[0] else None
+    except Exception:
+        pass
+    return base
 
 
 @router.post("/logout")
