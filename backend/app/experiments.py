@@ -1,5 +1,8 @@
 from typing import Annotated
 
+import json
+from pathlib import Path
+
 from fastapi import APIRouter, Query, Request
 from pydantic import Field
 from sqlalchemy import text
@@ -40,6 +43,30 @@ def algorithms():
 
 @router.get("/experiments/evaluations")
 def evaluations():
+    """Serve the offline evaluation metrics produced by recommender/student/evaluate_all.py.
+
+    The metrics file is generated on the host under models/evaluation/metrics.json
+    and mirrored into the container-visible models/business/metrics.json (compose
+    only bind-mounts models/business).
+    """
+    candidates = [
+        Path("/app/models/business/metrics.json"),
+        Path("models/business/metrics.json"),
+        Path("models/business/metrics.json"),
+    ]
+    for path in candidates:
+        if path.is_file():
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+            except Exception as exc:
+                raise APIError(500, "EVALUATION_READ_FAILED", f"评价文件解析失败: {exc}") from None
+            return {
+                "status": "ready",
+                "metrics": data,
+                "dataset_version": DATASET,
+                "split_version": SPLIT,
+                "source": str(path),
+            }
     raise APIError(501, "EVALUATION_NOT_IMPLEMENTED", "评价流程留给学生实现；业务API不连接evaluation数据库", {
         "status": "not_implemented", "metrics": None, "dataset_version": DATASET, "split_version": SPLIT})
 
