@@ -201,3 +201,48 @@ html, body {
   color: #00BE06 !important;
   font-weight: 700;
 }
+
+/* ===== Home page — iQiyi green theme override ===== */
+.home-page { background: #f5f6f8 !important; }
+.home-page .hero {
+  background: linear-gradient(135deg, #00BE06 0%, #00a805 60%, #00d407 100%) !important;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 190, 6, 0.15);
+  color: #fff !important;
+}
+.home-page .hero .eyebrow,
+.home-page .hero .eyebrow span { color: rgba(255,255,255,0.85) !important; }
+.home-page .hero h1 { color: #fff !important; }
+.home-page .hero h1 span { color: #ffe37e !important; }
+.home-page .hero-description { color: rgba(255,255,255,0.9) !important; }
+.home-page .hero .button.primary {
+  background: #fff !important;
+  color: #00BE06 !important;
+  border-color: #fff !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.home-page .hero .button.primary:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+.home-page .hero .button.subtle {
+  background: rgba(255,255,255,0.18) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,0.4) !important;
+}
+.home-page .hero .button.subtle:hover { background: rgba(255,255,255,0.28) !important; }
+.home-page .hero .hero-footnote { color: rgba(255,255,255,0.7) !important; }
+.home-page .hero .hero-footnote .line { background: rgba(255,255,255,0.4) !important; }
+.home-page .intro-strip {
+  background: #fff !important;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  color: #333 !important;
+}
+.home-page .intro-strip strong { color: #1a1a1a !important; }
+.home-page .intro-strip span { color: #666 !important; }
+.home-page .intro-strip a { color: #00BE06 !important; }
+.home-page .section-heading h2 { color: #1a1a1a !important; }
+.home-page .section-heading .eyebrow { color: #00BE06 !important; }
+.home-page .section-heading .muted { color: #8890a0 !important; }
+.home-page .section-heading .heading-dot { color: #00BE06 !important; }
+.home-page .text-link { color: #00BE06 !important; }
+.home-page .film-ticket { background: #fff !important; box-shadow: 20px 24px 0 rgba(0,0,0,0.08) !important; }
+.home-page .orbital { border-color: rgba(255,255,255,0.25) !important; }
