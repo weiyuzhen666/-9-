@@ -2,7 +2,7 @@ import { reactive } from 'vue'
 import http from '../api'
 import type { Movie } from '../types'
 
-const cache = reactive<Record<string, string>>({})
+const cache = reactive<Record<string, Movie | null>>({})
 const pending = new Map<string, Promise<void>>()
 
 export async function ensureMovieTitles(ids: string[]): Promise<void> {
@@ -11,9 +11,9 @@ export async function ensureMovieTitles(ids: string[]): Promise<void> {
     const p = (async () => {
       try {
         const { data } = await http.get<Movie>(`/movies/${id}`)
-        cache[id] = data.title_zh || data.movielens_title
+        cache[id] = data
       } catch {
-        cache[id] = ''
+        cache[id] = null
       } finally {
         pending.delete(id)
       }
@@ -23,6 +23,11 @@ export async function ensureMovieTitles(ids: string[]): Promise<void> {
   }))
 }
 
+export function getMovie(id: string): Movie | null {
+  return cache[id] ?? null
+}
+
 export function movieTitle(id: string): string {
-  return cache[id] || `电影 #${id}`
+  const m = cache[id]
+  return m ? (m.title_zh || m.movielens_title) : `电影 #${id}`
 }
