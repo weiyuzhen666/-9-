@@ -22,6 +22,10 @@ class RecommendationQuery(Input):
     limit: int = Field(default=10, ge=1, le=50)
 
 
+class ExplanationQuery(Input):
+    movie_id: str = Field(min_length=1, max_length=16)
+
+
 def invoke(algorithm: Algorithm, kind: str, uid: int, limit: int):
     request = RecommendationRequest(kind, uid, limit, "business", DATASET, SPLIT)
     try:
@@ -84,3 +88,86 @@ def history_recommendations(ml_user_id: IdPath, algorithm: Algorithm, request: R
         if conn.execute(text("SELECT ml_user_id FROM history_users WHERE ml_user_id=:id"), {"id": uid}).first() is None:
             raise APIError(404, "HISTORY_USER_NOT_FOUND", "历史匿名用户不存在")
     return invoke(algorithm, "ml", uid, query.limit)
+
+
+def _movie_title(conn, movie_id: str) -> str:
+    row = conn.execute(
+        text("SELECT title_zh, movielens_title FROM movies WHERE movie_id=:m"),
+        {"m": movie_id},
+    ).first()
+    if row is None:
+        return movie_id
+    return row[0] or row[1] or movie_id
+
+
+def _llm_explain(evidence: dict) -> tuple[str, str]:
+    """Ask the LLM to turn real evidence into plain Chinese. Returns (text, status).
+    status: 'ok' | 'unavailable'. The prompt forbids inventing movies/ratings;
+    when the LLM is unreachable we degrade to an evidence-only display."""
+    from .assistant import _llm_config
+    import urllib.request
+
+    if not evidence.get("evidence_sufficient"):
+        return (evidence.get("note") or "依据不足，无法生成个性化解释。"), "no_evidence"
+
+    cfg = _llm_config()
+    if not cfg["api_key"]:
+        return "", "unavailable"
+    payload = {
+        "model": cfg["model"],
+        "messages": [
+            {"role": "system", "content":
+                "你是电影推荐解释器。根据给定的真实推荐依据，用中文写2-3句自然的推荐理由，"
+                "必须与依据一一对应（引用用户评过的电影、评分、类型匹配或相似度）。"
+                "严禁增加任何电影、编造评分或更改推荐列表；依据不足时直接说明依据不足。"},
+            {"role": "user", "content": "推荐依据JSON：\n" + json.dumps(evidence, ensure_ascii=False)},
+        ],
+        "temperature": 0.3,
+    }
+    try:
+        req = urllib.request.Request(
+            cfg["base_url"].rstrip("/") + "/chat/completions",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={"Authorization": f"Bearer {cfg['api_key']}", "Content-Type": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        text_out = (data["choices"][0]["message"].get("content") or "").strip()
+        return (text_out, "ok") if text_out else ("", "unavailable")
+    except Exception:
+        return "", "unavailable"
+
+
+@router.get("/demo/history-users/{ml_user_id}/recommendations/{algorithm}/explanation")
+def explain_recommendation(ml_user_id: IdPath, algorithm: Algorithm, request: Request,
+                           query: Annotated[ExplanationQuery, Query()]):
+    """S4: real evidence for one recommended movie + LLM plain-language explanation."""
+    uid = identifier(ml_user_id)
+    with request.app.state.db.connection() as conn:
+        if conn.execute(text("SELECT ml_user_id FROM history_users WHERE ml_user_id=:id"), {"id": uid}).first() is None:
+            raise APIError(404, "HISTORY_USER_NOT_FOUND", "历史匿名用户不存在")
+
+    from recommender.student.explain import explain_item
+    req = RecommendationRequest("ml", uid, 10, "business", DATASET, SPLIT)
+    evidence = explain_item(algorithm, req, query.movie_id)
+
+    with request.app.state.db.connection() as conn:
+        evidence["movie_title"] = _movie_title(conn, evidence["movie_id"])
+        rated_titles = {}
+        for item in evidence["based_on"]:
+            rated_titles[item["rated_movie_id"]] = _movie_title(conn, item["rated_movie_id"])
+    evidence["rated_titles"] = rated_titles
+
+    explanation, llm_status = _llm_explain(evidence)
+    return {
+        "user": evidence["user"],
+        "algorithm": evidence["algorithm"],
+        "movie_id": evidence["movie_id"],
+        "movie_title": evidence["movie_title"],
+        "based_on": evidence["based_on"],
+        "rated_titles": evidence["rated_titles"],
+        "evidence_sufficient": evidence["evidence_sufficient"],
+        "note": evidence.get("note", ""),
+        "explanation": explanation,
+        "llm_status": llm_status,
+    }

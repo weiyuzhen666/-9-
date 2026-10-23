@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onScopeDispose, ref, watch } from 'vue'
+import { onScopeDispose, computed, ref, watch } from 'vue'
 import { Connection } from '@element-plus/icons-vue'
 import http, { ApiError } from '../api'
 import StatePanel from './StatePanel.vue'
@@ -11,6 +11,25 @@ const loading = ref(false), error = ref<unknown>(null), unavailable = ref(false)
 const result = ref<AlgorithmResult | null>(null)
 let run = 0
 onScopeDispose(() => { run++ })
+
+// ----- S4: AI explanation for a single recommended movie -----
+const explainVisible = ref(false), explainLoading = ref(false), explainError = ref('')
+const explainData = ref<{ movie_title: string; algorithm: string; user: string; based_on: any[]; rated_titles: Record<string, string>; explanation: string; llm_status: string; note: string; evidence_sufficient: boolean } | null>(null)
+// only content / itemcf expose per-item evidence today
+const showExplainBtn = computed(() => !!props.endpoint && /\/(content|itemcf)$/.test(props.endpoint))
+async function explainItem(movieId: string | number) {
+  explainVisible.value = true
+  explainLoading.value = true
+  explainError.value = ''
+  explainData.value = null
+  try {
+    const response = await http.get(`${props.endpoint}/explanation`, { params: { movie_id: String(movieId) } })
+    explainData.value = response.data
+  } catch (e) {
+    explainError.value = '解释暂不可用'
+  } finally { explainLoading.value = false }
+}
+function fmtContrib(v: number): string { return (v >= 0 ? '+' : '') + v.toFixed(3) }
 async function load() {
   const seq = ++run
   error.value = null; result.value = null; unavailable.value = false; loading.value = false
@@ -64,10 +83,42 @@ function fmtScore(s: number | null): string {
               </p>
               <p v-if="item.recall_sources && item.recall_sources.length" class="rec-sources">召回 {{ item.recall_sources.map(s => `${s}#${item.recall_ranks?.[s] ?? '?'}`).join(' + ') }}</p>
             </RouterLink>
+            <button v-if="showExplainBtn" class="explain-btn" type="button" @click="explainItem(item.movie_id)">AI解释</button>
           </article>
         </div>
       </div>
     </StatePanel>
+
+    <el-dialog v-model="explainVisible" width="560px" class="explain-dialog" append-to-body>
+      <template #header>
+        <span class="explain-dialog-title">为什么推荐这部电影？</span>
+      </template>
+      <div v-if="explainLoading" class="explain-loading"><span class="explain-spinner" />正在生成…</div>
+      <div v-else-if="explainError" class="explain-fail">{{ explainError }}，推荐列表不受影响。</div>
+      <div v-else-if="explainData" class="explain-body">
+        <p class="explain-meta"><strong>{{ explainData.movie_title }}</strong><span> ｜ 算法 {{ explainData.algorithm }} ｜ 历史用户 {{ explainData.user }}</span></p>
+        <template v-if="explainData.evidence_sufficient">
+          <p class="explain-label">真实推荐依据（来自算法本次计算）</p>
+          <table class="explain-table">
+            <thead><tr><th>用户评分过的电影</th><th>评分</th><th>相似度</th><th>贡献</th><th v-if="explainData.algorithm === 'content'">共同类型</th></tr></thead>
+            <tbody>
+              <tr v-for="row in explainData.based_on" :key="row.rated_movie_id">
+                <td>{{ explainData.rated_titles[row.rated_movie_id] || row.rated_movie_id }}</td>
+                <td>{{ row.rating.toFixed(1) }}</td>
+                <td>{{ row.similarity.toFixed(3) }}</td>
+                <td :class="row.contribution >= 0 ? 'pos' : 'neg'">{{ fmtContrib(row.contribution) }}</td>
+                <td v-if="explainData.algorithm === 'content'">{{ (row.common_genres || []).join('、') || '—' }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p v-if="explainData.explanation" class="explain-ai">
+            <span class="explain-ai-tag">AI 推荐理由</span>{{ explainData.explanation }}
+          </p>
+          <p v-else class="explain-fail">AI 解释暂不可用，以上为算法真实计算依据，推荐列表不受影响。</p>
+        </template>
+        <p v-else class="explain-fail">{{ explainData.note || '依据不足，无法生成个性化解释。' }}</p>
+      </div>
+    </el-dialog>
   </section>
 </template>
 
@@ -136,4 +187,42 @@ function fmtScore(s: number | null): string {
   font-size: 10px; color: #00BE06; margin-top: 6px;
   font-family: "SF Mono", Consolas, monospace;
 }
+/* ----- S4 AI explanation ----- */
+.explain-btn {
+  margin-top: 7px; width: 100%;
+  padding: 4px 0; border-radius: 999px;
+  font-size: 11px; font-weight: 600; color: #00a805;
+  background: rgba(0, 190, 6, .06); border: 1px solid rgba(0, 190, 6, .35);
+  cursor: pointer; transition: all .2s ease;
+}
+.explain-btn:hover { background: #00BE06; color: #fff; }
+.explain-dialog-title { font-size: 16px; font-weight: 700; color: #17421f; }
+.explain-loading { display: flex; align-items: center; gap: 10px; color: #00a805; font-size: 14px; padding: 18px 0; }
+.explain-spinner {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 2px solid rgba(0, 190, 6, .25); border-top-color: #00BE06;
+  animation: explain-spin .8s linear infinite;
+}
+@keyframes explain-spin { to { transform: rotate(360deg); } }
+.explain-meta { font-size: 14px; margin: 0 0 14px; color: #444; }
+.explain-meta span { color: #888; font-size: 12.5px; }
+.explain-label { font-size: 12px; font-weight: 600; color: #666; letter-spacing: .04em; margin: 0 0 8px; }
+.explain-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-bottom: 14px; }
+.explain-table th, .explain-table td { border: 1px solid #e4e9ee; padding: 6px 9px; text-align: left; }
+.explain-table th { background: #f3f8f4; color: #2b5c38; font-weight: 600; }
+.explain-table td.pos { color: #00a805; font-weight: 600; }
+.explain-table td.neg { color: #d0483e; font-weight: 600; }
+.explain-ai {
+  margin: 0; padding: 12px 14px; border-radius: 10px;
+  background: linear-gradient(135deg, rgba(0, 190, 6, .07), rgba(0, 190, 132, .08));
+  border: 1px solid rgba(0, 190, 6, .22);
+  font-size: 13.5px; line-height: 1.8; color: #2c3a2f;
+}
+.explain-ai-tag {
+  display: inline-block; margin-right: 8px; padding: 1px 9px;
+  border-radius: 999px; font-size: 11px; font-weight: 700; color: #fff;
+  background: linear-gradient(135deg, #00d218, #00BE06);
+  vertical-align: 1px;
+}
+.explain-fail { margin: 0; padding: 12px 14px; border-radius: 10px; background: #fdf3f2; border: 1px solid #f3d7d3; color: #a1443a; font-size: 13px; }
 </style>
