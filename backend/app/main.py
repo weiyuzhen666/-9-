@@ -108,4 +108,31 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(activity_router, prefix="/api/v1", dependencies=[Depends(ready_dependency)])
     app.include_router(experiments_router, prefix="/api/v1", dependencies=[Depends(ready_dependency)])
     app.include_router(assistant_router, prefix="/api/v1", dependencies=[Depends(ready_dependency)])
+
+    # 本地电影海报路由（下载到 models/business/posters/ 目录后即可生效）
+    from pathlib import Path
+    from fastapi.responses import FileResponse, StreamingResponse
+
+    POSTER_DIRS = [
+        Path("/app/models/business/posters"),          # Docker 容器挂载
+        Path("/app/models/posters"),
+        Path(ROOT / "models" / "business" / "posters"),  # 本地开发 fallback
+    ]
+
+    @app.get("/api/v1/posters/{name}")
+    def get_local_poster(name: str):
+        """Serve a locally-downloaded movie poster. 404 if not present."""
+        import re
+        # 安全校验：只允许 movie_{digits}.jpg / .jpeg / .png
+        if not re.fullmatch(r"movie_\d+\.(jpg|jpeg|png|webp)", name, re.I):
+            raise APIError(400, "INVALID_POSTER_NAME", "海报文件名不合法")
+        for d in POSTER_DIRS:
+            candidate = d / name
+            if candidate.is_file() and candidate.stat().st_size > 500:
+                ext = candidate.suffix.lower()
+                ctype = {"jpg": "image/jpeg", "jpeg": "image/jpeg",
+                         "png": "image/png", "webp": "image/webp"}.get(ext, "image/jpeg")
+                return FileResponse(candidate, media_type=ctype, headers={"Cache-Control": "public, max-age=86400"})
+        raise APIError(404, "POSTER_NOT_FOUND", f"本地没有海报 {name}")
+
     return app

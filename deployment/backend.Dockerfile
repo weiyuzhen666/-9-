@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r /tmp/deployment-requirements.txt
 COPY backend/ backend/
 COPY recommender/ recommender/
 COPY scripts/student_package.py scripts/student_package.py
-COPY deployment/*.py deployment/
+COPY deployment/ deployment/
 USER 10001
 EXPOSE 8000
 ENTRYPOINT ["python", "-m", "deployment.serve"]

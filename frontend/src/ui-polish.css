@@ -164,7 +164,7 @@ html, body {
 /* ----- Filter bar green focus ----- */
 .filter-bar .el-input.is-focus .el-input__wrapper,
 .filter-bar .el-select.is-focused .el-select__wrapper {
-  box-shadow: 0 0 0 1px #00BE06 inset !important;
+  box-shadow: 0 0 0 1px #00BE06 inset, 0 0 0 4px rgba(0, 190, 6, 0.1) !important;
 }
 
 /* ----- Empty state icon gentle pulse ----- */
@@ -246,3 +246,657 @@ html, body {
 .home-page .text-link { color: #00BE06 !important; }
 .home-page .film-ticket { background: #fff !important; box-shadow: 20px 24px 0 rgba(0,0,0,0.08) !important; }
 .home-page .orbital { border-color: rgba(255,255,255,0.25) !important; }
+
+/* =====================================================================
+   2025-2026 Modern UI trends — glassmorphism / micro-motion / gradient
+   ===================================================================== */
+
+/* ----- 1. Glassmorphism sticky header ----- */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.72) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  backdrop-filter: saturate(180%) blur(16px);
+  border-bottom: 1px solid rgba(232, 233, 236, 0.6) !important;
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.04) !important;
+  transition: box-shadow 0.3s ease;
+}
+.header-inner {
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
+
+/* ----- Nav link sliding underline ----- */
+.header-inner nav a {
+  position: relative;
+  border-bottom: none !important;
+  transition: color 0.22s ease;
+}
+.header-inner nav a::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  width: 0;
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #00BE06, #00d407);
+  transform: translateX(-50%);
+  transition: width 0.28s cubic-bezier(.2,.8,.3,1.2);
+}
+.header-inner nav a:hover::after,
+.header-inner nav a.active::after { width: 60%; }
+.header-inner nav a.active { color: #00BE06 !important; }
+
+/* ----- Brand mark pulse glow ----- */
+.brand-mark {
+  position: relative;
+  transition: transform 0.3s cubic-bezier(.2,.8,.3,1.4), box-shadow 0.3s ease;
+}
+.brand:hover .brand-mark {
+  transform: scale(1.08) rotate(-4deg);
+  box-shadow: 0 0 0 4px rgba(0, 190, 6, 0.12), 0 4px 12px rgba(0, 190, 6, 0.25);
+}
+
+/* ----- 2. Page & card entrance animations ----- */
+@keyframes clFadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes clFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes clScaleIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.page { animation: clFadeUp 0.5s cubic-bezier(.2,.8,.3,1) both; }
+.hero { animation: clScaleIn 0.55s cubic-bezier(.2,.8,.3,1) both; }
+
+/* staggered movie-card entrance */
+.movie-grid .movie-card {
+  animation: clFadeUp 0.5s cubic-bezier(.2,.8,.3,1) both;
+}
+.movie-grid .movie-card:nth-child(1)  { animation-delay: 0.02s; }
+.movie-grid .movie-card:nth-child(2)  { animation-delay: 0.06s; }
+.movie-grid .movie-card:nth-child(3)  { animation-delay: 0.10s; }
+.movie-grid .movie-card:nth-child(4)  { animation-delay: 0.14s; }
+.movie-grid .movie-card:nth-child(5)  { animation-delay: 0.18s; }
+.movie-grid .movie-card:nth-child(6)  { animation-delay: 0.22s; }
+.movie-grid .movie-card:nth-child(7)  { animation-delay: 0.26s; }
+.movie-grid .movie-card:nth-child(8)  { animation-delay: 0.30s; }
+.movie-grid .movie-card:nth-child(9)  { animation-delay: 0.34s; }
+.movie-grid .movie-card:nth-child(10) { animation-delay: 0.38s; }
+.movie-grid .movie-card:nth-child(11) { animation-delay: 0.42s; }
+.movie-grid .movie-card:nth-child(12) { animation-delay: 0.46s; }
+
+/* ----- 3. Movie card — poster zoom + neon glow lift ----- */
+.movie-card .poster-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.movie-card .movie-poster {
+  border-radius: 12px;
+  transition: box-shadow 0.35s ease;
+}
+.movie-card .movie-poster img {
+  transition: transform 0.5s cubic-bezier(.2,.8,.3,1), filter 0.4s ease;
+  will-change: transform;
+}
+.movie-card:hover .movie-poster img {
+  transform: scale(1.07);
+  filter: brightness(1.04) saturate(1.05);
+}
+.movie-card:hover .movie-poster {
+  box-shadow:
+    0 20px 40px -12px rgba(0, 190, 6, 0.28),
+    0 8px 18px -8px rgba(0, 0, 0, 0.18);
+}
+.movie-card h3 { transition: color 0.22s ease; }
+
+/* poster sheen sweep on hover */
+.movie-card .poster-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.28) 48%, transparent 62%);
+  transform: translateX(-110%);
+  transition: transform 0.7s ease;
+  pointer-events: none;
+  border-radius: 12px;
+}
+.movie-card:hover .poster-wrap::after { transform: translateX(110%); }
+
+/* ----- 4. Glassmorphic rating badge & movie id chip ----- */
+.my-rating {
+  background: rgba(0, 190, 6, 0.85) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 190, 6, 0.4);
+  border-radius: 999px;
+  font-weight: 600;
+}
+.movie-id {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+/* ----- 5. Primary button — shine sweep + deeper pill ----- */
+.button.primary {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  isolation: isolate;
+}
+.button.primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.35) 50%, transparent 65%);
+  transform: translateX(-110%);
+  transition: transform 0.6s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+.button.primary:hover::before { transform: translateX(110%); }
+.button.primary:active { transform: translateY(0) scale(0.97); }
+.button.subtle { border-radius: 999px; }
+.button.subtle:active { transform: scale(0.97); }
+
+/* ----- 6. Gradient headings & section accent ----- */
+.hero h1 span,
+.home-page .hero h1 span {
+  background: linear-gradient(92deg, #ffe37e 0%, #fff8d6 55%, #ffd94d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent !important;
+}
+.section-heading h2 .heading-dot {
+  background: linear-gradient(135deg, #00BE06, #00d407);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.section-heading h2 { position: relative; }
+
+/* text-link animated arrow */
+.text-link {
+  position: relative;
+  transition: color 0.2s ease, gap 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.text-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0;
+  height: 2px;
+  border-radius: 1px;
+  background: #00BE06;
+  transition: width 0.28s cubic-bezier(.2,.8,.3,1.2);
+}
+.text-link:hover::after { width: 100%; }
+
+/* ----- 7. Panel hover lift (algorithm/history/eval/auth cards) ----- */
+.algorithm-panel,
+.history-panel,
+.evaluation-panel,
+.rating-panel,
+.auth-card,
+.lab-controls,
+.filter-bar {
+  transition: transform 0.3s cubic-bezier(.2,.8,.3,1), box-shadow 0.3s ease;
+}
+.algorithm-panel:hover,
+.history-panel:hover,
+.evaluation-panel:hover,
+.rating-panel:hover,
+.auth-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 16px 36px -14px rgba(0, 190, 6, 0.16);
+  border-color: rgba(0, 190, 6, 0.22);
+}
+
+/* ----- 8. Hero orbital slow float ----- */
+@keyframes clDrift {
+  0%, 100% { transform: rotate(-28deg) translateY(0); }
+  50%      { transform: rotate(-26deg) translateY(-10px); }
+}
+@keyframes clDriftTwo {
+  0%, 100% { transform: rotate(-48deg) translateY(0); }
+  50%      { transform: rotate(-50deg) translateY(8px); }
+}
+.hero-art .orbital-one { animation: clDrift 9s ease-in-out infinite; }
+.hero-art .orbital-two { animation: clDriftTwo 11s ease-in-out infinite; }
+
+/* ----- 9. Skeleton shimmer for loading state ----- */
+@keyframes clShimmer {
+  from { background-position: -400px 0; }
+  to   { background-position: 400px 0; }
+}
+.state-panel .el-skeleton__item,
+.el-skeleton__item {
+  background: linear-gradient(90deg, #f0f1f3 25%, #fafbfc 45%, #f0f1f3 65%) !important;
+  background-size: 800px 100% !important;
+  animation: clShimmer 1.4s linear infinite !important;
+  border-radius: 8px;
+}
+
+/* ----- 10. Element Plus rounded & modern tweaks ----- */
+.el-button { border-radius: 999px; font-weight: 600; transition: all 0.2s ease; }
+.el-button:not(.is-disabled):active { transform: scale(0.96); }
+.el-button--primary {
+  box-shadow: 0 4px 14px -4px rgba(0, 190, 6, 0.5);
+}
+.el-button--primary:hover {
+  box-shadow: 0 8px 22px -6px rgba(0, 190, 6, 0.55);
+  transform: translateY(-1px);
+}
+.el-tag { transition: all 0.18s ease; }
+.el-pagination.is-background .el-pager li,
+.el-pagination.is-background .btn-prev,
+.el-pagination.is-background .btn-next {
+  background: #fff;
+  border: 1px solid #e9ebef;
+  border-radius: 10px;
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(16, 32, 20, .05);
+  transition: all 0.2s ease;
+}
+.el-pagination.is-background .el-pager li:not(.is-active):hover,
+.el-pagination.is-background .btn-prev:not(:disabled):hover,
+.el-pagination.is-background .btn-next:not(:disabled):hover {
+  color: #00BE06;
+  border-color: rgba(0, 190, 6, .4);
+  background: rgba(0, 190, 6, .06);
+}
+.el-pagination.is-background .el-pager li.is-active {
+  background: linear-gradient(135deg, #2ee66f, #00BE06);
+  border-color: transparent;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 6px 16px -6px rgba(0, 190, 6, .5);
+}
+.el-input-number .el-input-number__decrease,
+.el-input-number .el-input-number__increase { border-radius: 50%; }
+.el-rate__icon { transition: transform 0.18s ease; }
+.el-rate__item:hover .el-rate__icon { transform: scale(1.18); }
+
+/* ----- 11. Detail page polish ----- */
+.detail-page aside .movie-poster {
+  border-radius: 16px;
+  box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.4s cubic-bezier(.2,.8,.3,1);
+}
+.detail-page aside .movie-poster:hover { transform: translateY(-4px) scale(1.01); }
+.film-facts > div {
+  transition: background 0.2s ease, transform 0.2s ease;
+  border-radius: 8px;
+}
+.film-facts > div:hover { background: rgba(0, 190, 6, 0.05); }
+
+/* ----- 12. Footer subtle fade-in ----- */
+.site-footer { animation: clFadeIn 0.8s ease both; }
+.footer-brand { transition: opacity 0.2s ease; }
+.footer-brand:hover { opacity: 0.85; }
+
+/* ----- 13. Focus ring — soft green glow ----- */
+a:focus-visible, button:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(0, 190, 6, 0.25);
+  border-radius: 8px;
+}
+
+/* ----- Reduced motion respect ----- */
+@media (prefers-reduced-motion: reduce) {
+  .page, .hero, .movie-grid .movie-card, .site-footer { animation: none !important; }
+  .hero-art .orbital-one, .hero-art .orbital-two, .hero-blob { animation: none !important; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+}
+
+/* =====================================================================
+   Round 2 — 大整改：氛围纹理 / Hero光斑 / 卡片容器化 / 详情页背景
+   ===================================================================== */
+
+/* ----- 全局氛围：顶部绿光晕 + 细点阵纹理 ----- */
+body {
+  background-image:
+    radial-gradient(ellipse 70% 42% at 50% -8%, rgba(0, 190, 6, 0.07), transparent),
+    radial-gradient(circle at 1px 1px, rgba(20, 40, 20, 0.028) 1px, transparent 0);
+  background-size: 100% 100%, 24px 24px;
+  background-attachment: fixed;
+}
+
+/* ----- Hero 漂浮光斑 ----- */
+.hero { position: relative; }
+.hero-copy, .hero-art { position: relative; z-index: 1; }
+.hero-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+}
+.blob-a {
+  width: 420px; height: 420px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.38), transparent 65%);
+  top: -130px; right: 6%;
+  animation: clBlobFloat 12s ease-in-out infinite;
+}
+.blob-b {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(0, 90, 3, 0.4), transparent 65%);
+  bottom: -150px; left: -6%;
+  animation: clBlobFloat 15s ease-in-out infinite reverse;
+}
+@keyframes clBlobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(34px, -26px) scale(1.09); }
+}
+
+/* ----- Hero 热门类型胶囊 ----- */
+.hero-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.hero-tags-label {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  color: rgba(255, 255, 255, 0.68);
+  margin-right: 4px;
+}
+.hero-tag {
+  padding: 6px 15px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: all 0.22s ease;
+}
+.hero-tag:hover {
+  background: #fff;
+  color: #00BE06;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+}
+
+/* ----- 电影卡片容器化：白卡片 + 整体上浮 ----- */
+.movie-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 10px 10px 14px;
+  border: 1px solid #f0f1f3;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), 0 10px 24px -16px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s cubic-bezier(.2,.8,.3,1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.movie-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(0, 190, 6, 0.28);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), 0 22px 42px -16px rgba(0, 190, 6, 0.25);
+}
+.movie-card:hover > a { transform: none; }
+.movie-card .poster-wrap { border-radius: 10px; }
+.movie-card .movie-poster { border-radius: 10px; border: none; }
+.movie-card .card-meta { padding: 10px 6px 2px; }
+.movie-card .card-meta h3 { margin-top: 0; font-weight: 600; -webkit-line-clamp: 1; }
+.movie-card .card-meta p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 海报悬浮遮罩 + 查看详情按钮 */
+.poster-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 14px;
+  background: linear-gradient(180deg, transparent 52%, rgba(0, 0, 0, 0.58));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 10px;
+  pointer-events: none;
+}
+.movie-card:hover .poster-overlay { opacity: 1; }
+.poster-play {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #00BE06;
+  font-size: 12px;
+  font-weight: 600;
+  transform: translateY(10px);
+  transition: transform 0.32s cubic-bezier(.2,.8,.3,1.3);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+.movie-card:hover .poster-play { transform: translateY(0); }
+
+/* ----- 详情页：顶部模糊海报氛围背景 ----- */
+.detail-page { position: relative; overflow: hidden; }
+.detail-backdrop {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 480px;
+  background-size: cover;
+  background-position: center 18%;
+  filter: blur(55px) saturate(1.35) brightness(1.06);
+  transform: scale(1.18);
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+.detail-backdrop::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(245, 246, 248, 0.1) 0%, rgba(245, 246, 248, 0.6) 55%, #f5f6f8 96%);
+}
+.detail-page .back-link,
+.detail-page .state-panel,
+.detail-page .detail-layout { position: relative; z-index: 1; }
+.detail-page .back-link {
+  background: rgba(255, 255, 255, 0.65);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+/* ----- 实验室：AI 助手渐变边框（流行 AI 产品风） ----- */
+.assistant-panel {
+  border: 1.5px solid transparent !important;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(120deg, rgba(0, 190, 6, 0.65), rgba(0, 229, 160, 0.55), rgba(79, 172, 254, 0.55)) border-box !important;
+  box-shadow: 0 4px 20px -6px rgba(0, 190, 6, 0.15) !important;
+}
+.coldstart-wizard {
+  border: 1.5px solid transparent !important;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(120deg, rgba(0, 190, 6, 0.5), rgba(102, 214, 105, 0.4)) border-box !important;
+}
+
+/* 实验室左侧控制栏吸顶 */
+@media (min-width: 781px) {
+  .lab-controls { position: sticky; top: 104px; }
+}
+
+/* ----- 登录页：卡片顶部渐变条 + 标题渐变 ----- */
+.auth-card { position: relative; overflow: hidden; }
+.auth-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #00BE06, #00e5a0, #4facfe);
+}
+.auth-intro h1 span {
+  background: linear-gradient(92deg, #00BE06, #00d407);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ----- 页脚：顶部渐变光线 ----- */
+.site-footer { position: relative; border-top: none !important; }
+.site-footer::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0, 190, 6, 0.5), transparent);
+}
+
+/* ----- intro-strip 卡片化 ----- */
+.intro-strip {
+  background: #fff !important;
+  border: 1px solid #f0f1f3 !important;
+  border-radius: 14px !important;
+  padding: 18px 24px !important;
+  margin-top: 18px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 10px 24px -16px rgba(0, 0, 0, 0.1);
+}
+
+/* =====================================================================
+   Round 3 — 全局交互质感：滚动进度 / 路由过渡 / 回顶 / 登录页氛围
+   ===================================================================== */
+
+/* ----- 顶部滚动进度条（绿→青渐变发光） ----- */
+.scroll-progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  z-index: 400;
+  background: linear-gradient(90deg, #00BE06, #00e676, #4facfe);
+  box-shadow: 0 0 10px rgba(0, 230, 118, 0.65);
+  border-radius: 0 3px 3px 0;
+  transition: width 0.08s linear;
+  pointer-events: none;
+}
+
+/* ----- 导航栏滚动感知阴影 ----- */
+.site-header.scrolled {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.09) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* ----- 路由切换过渡（淡入上浮） ----- */
+.page-fade-enter-active { transition: opacity 0.28s ease, transform 0.28s ease; }
+.page-fade-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.page-fade-enter-from { opacity: 0; transform: translateY(12px); }
+.page-fade-leave-to { opacity: 0; transform: translateY(-6px); }
+
+/* ----- 悬浮回顶按钮 ----- */
+.back-top {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 300;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #00e676, #00BE06);
+  color: #fff;
+  font-size: 18px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 10px 24px -6px rgba(0, 190, 6, 0.55);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.back-top:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(0, 190, 6, 0.65);
+}
+.back-top:active { transform: translateY(-1px) scale(0.94); }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease, transform 0.25s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(10px); }
+
+/* ----- 登录页氛围光斑 ----- */
+.auth-page { position: relative; }
+.auth-page::before,
+.auth-page::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  z-index: 0;
+  pointer-events: none;
+}
+.auth-page::before {
+  width: 440px; height: 440px;
+  background: radial-gradient(circle, rgba(0, 190, 6, 0.16), transparent 65%);
+  top: -90px; right: -60px;
+}
+.auth-page::after {
+  width: 380px; height: 380px;
+  background: radial-gradient(circle, rgba(79, 172, 254, 0.13), transparent 65%);
+  bottom: -60px; left: -50px;
+}
+.auth-intro, .auth-card { position: relative; z-index: 1; }
+
+/* ----- 登录/注册按钮渐变 ----- */
+.auth-card .el-button--primary {
+  background: linear-gradient(135deg, #00e676, #00BE06) !important;
+  border: none !important;
+  box-shadow: 0 8px 20px -6px rgba(0, 190, 6, 0.5) !important;
+}
+.auth-card .el-button--primary:hover {
+  background: linear-gradient(135deg, #3dff8f, #00a805) !important;
+  box-shadow: 0 12px 26px -6px rgba(0, 190, 6, 0.6) !important;
+}
+
+/* ----- reduced-motion 补充 ----- */
+@media (prefers-reduced-motion: reduce) {
+  .page-fade-enter-active, .page-fade-leave-active,
+  .fade-enter-active, .fade-leave-active { transition: none !important; }
+  .scroll-progress { transition: none !important; }
+}
+
+/* ----- Element Plus 全局明亮化补充（theme.css 已有输入框/表格主题，此处只补增量） ----- */
+/* 下拉选项：圆角 + 绿色 hover/选中 */
+.el-select-dropdown__item { border-radius: 6px; margin: 0 6px; padding: 0 12px; }
+.el-select-dropdown__item:hover { background: rgba(0, 190, 6, 0.07); }
+.el-select-dropdown__item.is-selected { color: #00BE06; font-weight: 600; background: rgba(0, 190, 6, 0.08); }
+/* 复选框 / 计数器：绿色选中态 */
+.el-checkbox__input.is-checked .el-checkbox__inner { background: #00BE06; border-color: #00BE06; }
+.el-checkbox__input.is-checked + .el-checkbox__label { color: #00BE06; }
+.el-checkbox__inner:hover { border-color: #00BE06; }
+.el-input-number .el-input-number__decrease:hover,
+.el-input-number .el-input-number__increase:hover { color: #00BE06; }
+/* Tabs：激活条升级为绿色渐变 */
+.el-tabs__item { transition: color 0.2s ease; }
+.el-tabs__item:hover { color: #00a805; }
+.el-tabs__item.is-active { color: #00BE06; font-weight: 600; }
+.el-tabs__active-bar {
+  background: linear-gradient(90deg, #00e676, #00BE06);
+  height: 3px; border-radius: 2px;
+}
+/* Alert：柔和圆角 */
+.el-alert { border-radius: 10px; }
+/* Message 全局提示：胶囊形 */
+.el-message { border-radius: 999px; box-shadow: 0 10px 28px -10px rgba(0, 0, 0, 0.22); }

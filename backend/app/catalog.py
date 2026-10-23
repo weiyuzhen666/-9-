@@ -63,7 +63,7 @@ def movies(request: Request, query: Annotated[MovieQuery, Query()]):
             values["term"] = "%" + escaped + "%"
         where = " WHERE " + " AND ".join(clauses) if clauses else ""
         total = conn.execute(text("SELECT COUNT(*) FROM movies" + where), values).scalar_one()
-        selected = conn.execute(text("SELECT movie_id,movielens_title,title_zh,genres,release_year,poster_path "
+        selected = conn.execute(text("SELECT movie_id,movielens_title,title_zh,genres,release_year,poster_path,tmdb_id "
             "FROM movies" + where + " ORDER BY movie_id LIMIT :limit OFFSET :offset"), values).mappings().all()
     return page_result(selected, total, query)
 

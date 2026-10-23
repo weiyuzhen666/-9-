@@ -2,7 +2,7 @@ export interface Account { account_id: string; subject_key: string; login_name: 
 export interface Movie {
   movie_id: string; movielens_title: string; title_zh: string | null; genres: string[]
   release_year?: number | null; poster_path: string | null; original_title?: string | null
-  overview?: string | null; release_date?: string | null; runtime_minutes?: number | null
+  tmdb_id?: string | null; overview?: string | null; release_date?: string | null; runtime_minutes?: number | null
   original_language?: string | null; directors?: unknown[] | null; cast_top10?: unknown[] | null
   rating?: string | null; created_at?: string; updated_at?: string; timestamp_utc?: number
 }

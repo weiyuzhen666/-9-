@@ -51,7 +51,7 @@ function fmtScore(s: number | null): string {
           <article v-for="item in result.items" :key="item.movie_id" class="rec-card">
             <RouterLink :to="`/movies/${item.movie_id}`" :aria-label="`查看 ${movieTitle(item.movie_id)} 详情`">
               <div class="rec-poster-wrap">
-                <MoviePoster :path="getMovie(item.movie_id)?.poster_path" :title="movieTitle(item.movie_id)" />
+                <MoviePoster :path="getMovie(item.movie_id)?.poster_path" :title="movieTitle(item.movie_id)" :genres="getMovie(item.movie_id)?.genres" :year="getMovie(item.movie_id)?.release_year" :tmdbId="getMovie(item.movie_id)?.tmdb_id" />
                 <span class="rec-rank">TOP {{ item.rank }}</span>
                 <span v-if="item.score !== null" class="rec-score" :title="`模型分数 ${item.score}`">{{ fmtScore(item.score) }}</span>
                 <span class="rec-cat">电影</span>
@@ -75,8 +75,8 @@ function fmtScore(s: number | null): string {
 .model-line { color: var(--muted); font-size: 12px; margin-bottom: 14px; }
 .rec-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 14px;
 }
 .rec-card { transition: transform 0.22s cubic-bezier(.2,.8,.3,1.2); }
 .rec-card:hover { transform: translateY(-3px); }

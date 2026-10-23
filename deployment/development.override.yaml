@@ -1,0 +1,5 @@
+services:
+  api:
+    image: cinelab-student/cinelab-api:66b78f22722b75c4b68478f8f0d37a38
+  web:
+    image: cinelab-student/cinelab-web:f0d6cf5a140640d8a2904975845f8af4
